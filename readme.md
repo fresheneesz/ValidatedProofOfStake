@@ -82,7 +82,7 @@ VPoS seeks to completely eliminate a hashpower requirement to secure a cryptocur
   * [Comparison to PeerCoin](#comparison-to-peercoin)
   * [Comparison to NXT](#comparison-to-nxt)
   * [Comparison to Proof of Activity](#comparison-to-proof-of-activity)
-  * [Comparison to Proof-of-Time-Ownership v1](#comparison-to-proof-of-time-ownership-v1)
+  * [Comparison to Proof-of-Time-Ownership](#comparison-to-proof-of-time-ownership)
 
 # Protocol
 
@@ -556,7 +556,7 @@ It should be noted that the nothing-at-stake problem is not an attack. A single 
 
 Bitfury [pointed out](http://bitfury.com/content/5-white-papers-research/pos-vs-pow-1.0.2.pdf) that minting rewards in Nxt aren't strictly fair - minters with more stake will receive a higher proportion of the minting rewards than the proportion of stake they have. So in Nxt, the rich do get richer (while in PoS systems with fair distributions, this isn't usually the case).
 
-The security of Nxt An attacker would predict the next 10 minters (10 confirmations is considered "permanent" according to the white paper) and if the prediction showed a high likelihood the attacker gets all 10, the attacker can spend on the honest chain, then revert that chain with a hidden chain attack. With just this, an attacker with 9.8% of the active stake gets an opportunity to double-spend more often than once per year on average. Even if 60 confirmations are used (to match bitcoin's average of 6-block/1-hour finalization time), an attacker with 30.1% of the active stake has one opportunity per year to attack. See [costOfAttackingAlts.js](costOfAttackingAlts.js) for the calculations. Factoring in the rich-get-richer effect and that 30.1% probability of minting a block only requires about 23% of the active stake. All in all, Nxt has some of the best security of any of the PoS systems out there, tho VPoS beats it by anywhere from 2- to 10-fold.
+In a minimal cost attack on Nxt, an attacker would predict the next 10 minters (10 confirmations is considered "permanent" according to the white paper) and if the prediction showed a high likelihood the attacker gets all 10, the attacker can spend on the honest chain, then revert that chain with a hidden chain attack. With just this, an attacker with 9.8% of the active stake gets an opportunity to double-spend more often than once per year on average. Even if 60 confirmations are used (to match bitcoin's average of 6-block/1-hour finalization time), an attacker with 30.1% of the active stake has one opportunity per year to attack. See [costOfAttackingAlts.js](costOfAttackingAlts.js) for the calculations. Factoring in the rich-get-richer effect and that 30.1% probability of minting a block only requires about 23% of the active stake. All in all, Nxt has some of the best security of any of the PoS systems out there, tho VPoS beats it by anywhere from 2- to 10-fold.
 
 Nxt does, however, have an interesting proposed solution for long-range revisions, requiring a hash of a recent block in each transaction so that long range revisions wouldn't be able to include real transactions. However, this increases the size of transactions and doesn't prevent an attacker from using their own transactions inside their alternate chain. While more expensive, it could probably offer partial mitigation of shorter medium-range revisions than hardcoded checkpointing can prevent (since there is a limit to how often users can feasibly and safely update their software).
 
@@ -564,7 +564,7 @@ Nxt does, however, have an interesting proposed solution for long-range revision
 
 [Proof of Activity (PoA)](https://www.decred.org/research/bentov2014.pdf) is a hybrid protocol that requires validating each block with both proof of work and proof of stake. While PoA would seem to have good theoretical security against double-spending attacks, the protocol has a number of critical security flaws. You can read more about these flaws [here](https://github.com/fresheneesz/proofOfTimeOwnership).
 
-## Comparison to Proof-of-Time-Ownership v1
+## Comparison to Proof-of-Time-Ownership
 
 PoTO is a hybrid PoW/PoS system that used much of the ideas in this proposal, but used mining hashes as randomness instead of distributed randomness. The security of PoTO depended in part on a substantial percentage of actively minting coins, but it could only realistically reach a minimum attack cost of around 5% of the total coins in the best case of plausible scenarios. Because VPoS gets rid of mining entirely, it's security is essentially free - only costing the minimal resources necessary to run full nodes. Also, VPoS could plausibly achieve an attack cost of almost 50% of the total coins, since nearly 100% of the coins actively minting is a realistic possibility. This makes VPoS likely 10 times as secure as PoTO.
 
