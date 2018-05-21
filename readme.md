@@ -3,7 +3,7 @@
 
 # Validated Proof of Stake
 
-VPoS is a proof-of-stake consensus protocol for distributed ordering of cryptocurrency transactions as an alternative to pure Proof of Work. Its primary unique qualities are using validators for each block, and having a mechanism to incentivize minters to mine only on one of the candidate longest-chains that doesn't require lock-in stake.
+VPoS is a proof-of-stake consensus protocol for distributed ordering of cryptocurrency transactions as an alternative to pure Proof of Work. Its primary unique qualities are using validators for each block, and having a mechanism to incentivize minters to mine only on one of the candidate longest-chains without requiring lock-in stake.
 
 ## Problems with Current Solutions
 
@@ -11,7 +11,7 @@ Proof of work is a solid and secure mechanism for determining a canonical order 
 
 Hybrid protocols that mitigate some of these problems have the problems of potentially significantly increased network traffic, higher risk of censorship attacks, are susceptible to two types of mining monopoly attacks described later in the paper, or don't allow a large fraction of coin owners to practically mint blocks (eg Decred and Memcoin2). The reliance on expensive hashpower severely limits the maximum security any of these hybrid systems can plausibly attain. The security of hybrid protocols are discussed in more detail in [the spec for Proof of Time-Ownership](https://github.com/fresheneesz/proofOfTimeOwnership), which is the immediate precursor to this protocol.
 
-Proof-of-Stake has the potential to decouple the security of the blockchain from resource expenditure, but other Proof-of-Stake systems have their own substantial problems, including the issue of resolving competing chains (the nothing-at-stake problem), the ability to cheaply create a fresh blockchain that compares as longer to the “true” chain, the fact that requiring users locking up funds limits how many people can participate in minting blocks, among other issues.
+Proof-of-Stake has the potential to decouple the security of the blockchain from resource expenditure, but other Proof-of-Stake systems have their own substantial problems, including the issue of resolving competing chains (the nothing-at-stake problem), the ability to cheaply create a fresh blockchain that compares as longer to the “true” chain, and the fact that requiring users locking up funds limits how many people can participate in minting blocks, among other issues.
 
 VPoS seeks to completely eliminate a hashpower requirement to secure a cryptocurrency and to use coins alone to secure the system. This specification defines a protocol that maintains a high level of security without exhibiting the problems exhibited by other PoS systems.
 
@@ -20,11 +20,11 @@ VPoS seeks to completely eliminate a hashpower requirement to secure a cryptocur
 * Is two orders of magnitude more secure than pure Proof-of-Work while using many orders of magnitude less real resources. Also VPoS is substantially more secure than other PoS proposals.
 * Almost everyone can participate in minting blocks with only the resources necessary to run a full node (with the same resource usage as Bitcoin).
 * Eliminates centralization of block creation related to network propagation delay. Because of this, the system can use lower blocktimes than other protocols and remain safe.
-* Increases the incentives to run a fully validating node
+* Increases the incentives to run a fully validating node.
 
 ## Major Tradeoffs
 
-* Has a failure mode where an attacker can permanently capture the system once they obtain near 50% of the active stake, after which the attacker can theoretically sell a majority of their stake without losing control of the chain. Whereas in systems that have a PoW component capturing the system requires maintaining a certain level of work (and therefore cost expenditure) during the length of the attack. This failure mode exists in all Proof-of-Stake systems.
+* Has a failure mode where an attacker can permanently capture the system once they obtain near 50% of the active stake, after which the attacker can theoretically sell a majority of their stake without losing control of the chain. Where as, in systems that have a PoW component, capturing the system requires maintaining a certain level of work (and therefore cost-expenditure) during the length of the attack. This failure mode exists in all Proof-of-Stake systems.
 * Slightly higher network traffic than PoW due to between 2-5 times more blocks to propagate (from competing forks) and 10-100 more kilobytes per block from validator information.
 * Slightly bigger blocks by 10-100 KB needed for validator information.
 
@@ -86,18 +86,18 @@ VPoS seeks to completely eliminate a hashpower requirement to secure a cryptocur
 
 # Protocol
 
-This document describes the protocol using Bitcoin terms, but these techniques could be applied to pretty much any cryptocurrency. The protocol hinges on three key design aspects:
+This document describes the protocol using Bitcoin terms, but these techniques could be applied to pretty much any cryptocurrency. The protocol hinges on four key design aspects:
 
 * Time-bound Proof of Stake - PoS minters compete with each other to create blocks. A minter is allowed to mint transactions into a block if one of their addresses comes up in a time-release progression. A very similar process is used to decide which validators are allowed to validate a block.
 * Delayed-release Distributed Randomness - Randomness created collaboratively by minters and released only long after the randomness has been set in stone.
 * Validation Signatures - Each block must be validated by a set of other minters before any block can mint on top of it.
 * Minter Punishments - Where minters who mint too far on the wrong chain will be fined.
 
-In VPoS, Proof-of-Stake (PoS) minters race for each block (rather than using quorums or voting). Each address has a chance of winning the right to mint a block each second based on the amount of coins that address contains. Just like Proof-of-Work mining is a race to find a block with a hash below a certain value, minting PoS blocks is also a race to find a hash below a certain value. However, where in PoW the number of tries you can do per second is unbounded, in VPoS (as in most PoS systems) minters only get one try per second per transaction output. This race incentivizes PoS minters release minted blocks promptly once they become valid. For each block, the minter who can demonstrate that their address has won the right to mint a block then creates and propagates a block as usual. Then a number of validators do a similar process. Once the necessary number of signatures has been propagated, the next minter can then mint on top of that block. These validators substantially decrease the effectiveness of hidden-chain attacks.
+In VPoS, Proof-of-Stake (PoS) minters race for each block (rather than using quorums or voting). Each address has a chance of winning the right to mint a block each second based on the amount of coins that address contains. Just like Proof-of-Work mining is a race to find a block with a hash below a certain value, minting PoS blocks is also a race to find a hash below a certain value. However, where in PoW the number of tries you can do per second is unbounded, in VPoS (as in most PoS systems) minters only get one try per second per transaction output. This race incentivizes PoS minters to release minted blocks promptly once they become valid. For each block, the minter who can demonstrate that their address has won the right to mint a block then creates and propagates that block as usual. Then a number of validators do a similar process. Once the necessary number of signatures has been propagated, the next minter can then mint on top of that block. These validators substantially decrease the effectiveness of hidden-chain attacks.
 
 Minters can mint for almost 0 cost, allowing almost anybody in the network to participate in block creation ("almost" anyone because a small minimum balance is required in order to mint). These minters also create an amount of randomness for each block, and include a proof in that block they can later use to verify they haven't changed that randomness when they finally reveal it to the rest of the network. This randomness is used to ensure that no one can game the system by predicting which addresses will get the right to mint or validate a particular block.
 
-Minters are incentivized to mint blocks on top of a very limited number of candidates for the longest chain via punishment fines for minters who mint too far on chains that aren't the longest one. This eliminates the nothing-at-stake problem while at the same time also eliminating latency-related advantages for minters with larger stake. This is done without any locked-up stake or waiting periods, allowing anyone to use their coins to mint at any time.
+Minters are incentivized to mint blocks on top of a very limited number of candidates for the longest chain. What provides this incentive are punishment fines for minters who mint too far on chains that aren't the longest one. This eliminates the nothing-at-stake problem while at the same time also eliminating latency-related advantages for minters with larger stake. This is done without any locked-up stake or waiting periods, allowing anyone to use their coins to mint at any time.
 
 ## Terms
 
@@ -149,10 +149,10 @@ A node will accept a block as valid if:
 3. `balance(mintingSignatureAddress) > minterPunishment` - The amount of coin contained in the `mintingSignatureAddress` must be greater than the `minterPunishment` amount,
 4. `validSignature(mintingSignatureAddress, minterSignature, prevBlockHash+curBlockHeader)` - The *minter signature* is valid,
 5. `minterSeed < applicableSourceSatoshi*maximumOutput/difficulty` - The hash of the block's *minter seed* must be smaller than the number of applicable source satoshi (which is the number of the *mintingSignatureAddress*'s satoshi owned by the *mintingSourceAddress* as of the block *minterSecretLifetime* blocks ago) divided by the `difficulty`, and
-6. `forEach validator v:`
- 	A. `blockTimestamp < v.timestamp` - The validation signature's timestamp is later than the block's timestamp,
-	B. `balance(validatorSignatureAddress) > minterPunishment` - The amount of coin contained in the `mintingSignatureAddress` must be greater than the `minterPunishment` amount.
-	C. `validSignature(v.signatureAddress, s.signature, prevBlockHash+curBlockHeader)`, and
+6. `forEach validator v:`  
+ 	A. `blockTimestamp < v.timestamp` - The validation signature's timestamp is later than the block's timestamp,  
+	B. `balance(validatorSignatureAddress) > minterPunishment` - The amount of coin contained in the `mintingSignatureAddress` must be greater than the `minterPunishment` amount.  
+	C. `validSignature(v.signatureAddress, s.signature, prevBlockHash+curBlockHeader)`, and  
     D. `v.seed < numberOfValidators*v.applicableSourceSatoshi*maximumOutput/difficulty` - The hash of the *validator seed* must be smaller than the required number of validators multiplied by the number of the *validatorSignatureAddress*'s satoshi owned by the *validatorSourceAddress* as of the block *minterSecretLifetime* blocks ago divided by the block difficulty.
 
 To mint a block, the minter simply creates a *minter signature* and block header, then propagates those. Similarly, to validate a block, a minter simply creates a validation item (described above) and propagates it.
@@ -195,7 +195,7 @@ The transaction fees and coinbase reward (fees and coinbase together being "the 
 
 The ability for minters to mint on shorter chains in the hopes they become the longest chain (ie the nothing-at-stake problem) would destroy the system's ability to come to a finalized consensus for any block.
 
-To combat this, a minter is allowed to include a proof, in their minted block, that another minter attempted to mint or validate a block on a chain where the most recent block is different from the chain in which the proof is included. If a valid proof is included in a block, the minter punishment fine transferred from the address that minted or validated the offending block to the address that mined or minted the block in which the proof was given, and if the address no longer contains enough coins to cover the fine, the minimum number of most recent transactions from that address will be invalidated in order to make enough coins available to cover the fine.
+To combat this, a minter is allowed to include a proof, in their minted block, that another minter attempted to mint or validate a block on a chain where the most recent block is different from the chain in which the proof is included. If a valid proof is included in a block, the minter punishment fine is transferred from the address that minted or validated the offending block to the address that minted the block in which the proof was given, and if the address no longer contains enough coins to cover the fine, the minimum number of most recent transactions from that address will be invalidated in order to make enough coins available to cover the fine.
 
 The proof will only be valid if the following conditions hold:
 
