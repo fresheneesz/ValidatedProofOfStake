@@ -1,5 +1,5 @@
-*Version: 1.99.0*  
-*Status: WIP*
+*Version: 0.99.0*  
+*Status: In Review*
 
 # Validated Proof of Stake
 
@@ -568,7 +568,7 @@ Please feel free to use the github issues as a forum for questions and discussin
 Version History
 ===============
 
-* 1.0.0 - First WIP version based on PoTO.
+* 1.99.0 - First WIP version based on PoTO.
 
 License
 =======
